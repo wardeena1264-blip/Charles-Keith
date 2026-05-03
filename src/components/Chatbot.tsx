@@ -14,7 +14,7 @@ export function Chatbot() {
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<ChatMessage[]>([
-    { role: 'model', text: 'Welcome to Charles & Keith. I am your personal AI Stylist. How can I assist you today?' }
+    { role: 'model', text: 'Welcome to Charles & Keith. I am your personal AI Stylist. How can I assist you today? **P.S. I found a special 15% discount for you! Use code CK-AI15 at checkout.**' }
   ]);
   const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);

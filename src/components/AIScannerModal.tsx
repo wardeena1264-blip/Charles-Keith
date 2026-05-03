@@ -7,6 +7,9 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Camera, X, CheckCircle2, AlertCircle, Info } from 'lucide-react';
 import { useStore } from '../context';
+import { useAuth } from '../context/AuthContext';
+import { db } from '../lib/firebase';
+import { doc, updateDoc } from 'firebase/firestore';
 import { getFitRecommendation } from '../lib/gemini';
 
 interface AIScannerModalProps {
@@ -23,6 +26,7 @@ export function AIScannerModal({ isOpen, onClose }: AIScannerModalProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const { setUserScanData } = useStore();
+  const { user } = useAuth();
 
   const startCamera = async () => {
     try {
@@ -75,7 +79,25 @@ export function AIScannerModal({ isOpen, onClose }: AIScannerModalProps) {
     };
 
     const recommendation = await getFitRecommendation(mockData);
-    setUserScanData({ ...mockData, ...recommendation });
+    const finalData = { ...mockData, ...recommendation };
+    setUserScanData(finalData);
+
+    // Save to Firestore if user is logged in
+    if (user) {
+      try {
+        await updateDoc(doc(db, 'users', user.uid), {
+          footProfile: {
+            size: mockData.recommendedSize,
+            width: recommendation.fitType || 'Standard',
+            archType: mockData.archType,
+            lastScanned: new Date().toISOString()
+          }
+        });
+      } catch (err) {
+        console.error("Error saving foot profile:", err);
+      }
+    }
+
     setScanStep('results');
   };
 

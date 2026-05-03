@@ -5,13 +5,16 @@
 
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Plus, Minus, ShoppingBag, Trash2 } from 'lucide-react';
+import { X, Plus, Minus, ShoppingBag, Trash2, Truck, Sparkles, Gift } from 'lucide-react';
 import { useStore } from '../context';
 
 export function CartDrawer({ onCheckout }: { onCheckout: () => void }) {
   const { cart, isCartOpen, setIsCartOpen, removeFromCart, updateQuantity } = useStore();
 
   const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const freeShippingThreshold = 200;
+  const shippingLeft = freeShippingThreshold - subtotal;
+  const progressPercent = Math.min((subtotal / freeShippingThreshold) * 100, 100);
 
   return (
     <AnimatePresence>
@@ -45,8 +48,27 @@ export function CartDrawer({ onCheckout }: { onCheckout: () => void }) {
               </button>
             </div>
 
+            {/* Free Shipping Progress */}
+            <div className="px-6 py-4 bg-[#F8F7F5] border-b border-border-light">
+              <div className="flex justify-between items-center mb-2">
+                <p className="text-[9px] uppercase font-bold tracking-[0.25em]">
+                  {subtotal >= freeShippingThreshold 
+                    ? "You've unlocked FREE SHIPPING!" 
+                    : `Only RM${shippingLeft.toFixed(0)} away from free shipping`}
+                </p>
+                <Truck size={14} className={subtotal >= freeShippingThreshold ? 'text-green-500' : 'text-gold-accent'} />
+              </div>
+              <div className="h-[2px] w-full bg-gray-200">
+                <motion.div 
+                  initial={{ width: 0 }}
+                  animate={{ width: `${progressPercent}%` }}
+                  className={`h-full transition-all duration-1000 ${subtotal >= freeShippingThreshold ? 'bg-green-500' : 'bg-gold-accent'}`}
+                />
+              </div>
+            </div>
+
             {/* Items */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-8 bg-[#F8F7F5]/50">
+            <div className="flex-1 overflow-y-auto p-6 space-y-8 bg-[#F8F7F5]/30">
               {cart.length === 0 ? (
                 <div className="h-full flex flex-col items-center justify-center text-center">
                   <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4 border border-border-light">
@@ -104,13 +126,29 @@ export function CartDrawer({ onCheckout }: { onCheckout: () => void }) {
             {/* Footer */}
             {cart.length > 0 && (
               <div className="p-8 border-t border-border-light bg-white">
-                <div className="flex justify-between mb-2">
-                  <span className="text-[11px] uppercase tracking-widest opacity-60 font-medium">Subtotal</span>
-                  <span className="text-lg font-serif italic">RM{subtotal}.00</span>
-                </div>
-                <div className="flex justify-between mb-8">
-                  <span className="text-[11px] uppercase tracking-widest opacity-60 font-medium">Shipping</span>
-                  <span className="text-[10px] uppercase tracking-widest font-bold text-green-600">Free</span>
+                <div className="flex flex-col gap-4 mb-8">
+                  <div className="flex justify-between items-center bg-gold-accent/5 p-4 border border-gold-accent/10">
+                    <div className="flex items-center gap-2 text-gold-accent">
+                      <Sparkles size={14} />
+                      <span className="text-[10px] font-bold uppercase tracking-widest">Points Earned</span>
+                    </div>
+                    <span className="text-sm font-bold text-black">{Math.floor(subtotal)} Points</span>
+                  </div>
+
+                  <div className="flex justify-between text-[11px] uppercase tracking-widest opacity-60 font-medium">
+                    <span>Subtotal</span>
+                    <span>RM{subtotal}.00</span>
+                  </div>
+                  <div className="flex justify-between text-[11px] uppercase tracking-widest opacity-60 font-medium">
+                    <span>Shipping</span>
+                    <span className={subtotal >= freeShippingThreshold ? 'text-green-600 font-bold' : ''}>
+                      {subtotal >= freeShippingThreshold ? 'FREE' : 'RM15.00'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center font-bold text-black pt-4 border-t border-border-light">
+                    <span className="text-xs uppercase tracking-[0.3em]">Total Value</span>
+                    <span className="text-xl font-serif italic">RM{subtotal >= freeShippingThreshold ? subtotal : subtotal + 15}.00</span>
+                  </div>
                 </div>
 
                 <button 

@@ -9,12 +9,24 @@ export interface Product {
   id: string;
   name: string;
   price: number;
+  originalPrice?: number;
   description: string;
   image: string;
   baseColor: string;
   material: string;
   features: string[];
   colors: { name: string; hex: string; images?: string[]; image: string }[];
+  heelPrices?: {
+    stiletto: number;
+    block: number;
+    flat: number;
+  };
+  isBestseller?: boolean;
+  isLimited?: boolean;
+  stockCount?: number;
+  isHeelKit?: boolean;
+  heelType?: HeelType;
+  compatibleWith?: string[];
 }
 
 export interface CartItem extends Product {
@@ -36,4 +48,13 @@ export interface FootScanData {
   archType: string;
   recommendedSize: number;
   confidence: number;
+}
+
+export interface Voucher {
+  id: string;
+  code: string;
+  discount: number;
+  type: 'percentage' | 'fixed';
+  description: string;
+  minSpend: number;
 }
